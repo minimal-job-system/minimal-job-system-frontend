@@ -1,0 +1,5 @@
+include LICENSE
+include README.md
+recursive-include job_system_frontend/templates *
+recursive-include job_system_frontend/static *
+recursive-include docs *
