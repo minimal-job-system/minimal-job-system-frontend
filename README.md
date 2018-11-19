@@ -31,3 +31,6 @@ Detailed documentation is in the "docs" directory.
 
 5. Run `python manage.py migrate database` to create the Django Constance models required by the Minimal Job System Frontend
 
+# External Resources
+Blur Close-Up Dragon Figure (139641), Anthony, pexels.com, Pexels License
+

@@ -38,12 +38,13 @@
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <a class="navbar-brand" href="#">
-                    {% app_icon as show_app_icon %}
-                    {% if show_app_icon %}
+                    {% app_icon as app_icon_var %}
+                    {% if app_icon_var %}
                         {% static "" as base_path %}
-                        <img src="{{ base_path }}{% app_icon %}" style="max-height:20px; display: inline;" />&nbsp;
+                        <img src="{{ base_path }}{% app_icon %}" style="height: 40px; margin: -20px 0px; display: inline;" />&nbsp;
                     {% endif %}
-                    {% app_title %}
+                    {% app_title as app_title_var %}
+                    {{ app_title_var|safe }}
                 </a>
             </div>
 
