@@ -298,7 +298,7 @@ function buildJobFieldSet(job) {
                     'class': 'btn btn-link no-form-control',
                     'data-toggle': 'tooltip',
                     'data-container': 'body',
-                    'data-placement': 'right',
+                    'data-placement': 'auto right',
                     'data-title': job['description'],
                     'type': 'button',
                     'style': 'width: auto; color: #337ab7;'
@@ -368,7 +368,21 @@ function buildJobParamsFieldSet(jobParams, initForms=0, minNumForms=0, maxNumFor
         $.each(modelFields, function(field_idx, modelField) {
             var formElement = null;
             if (field_idx < modelFields.length - 1) {
-                if (modelField.id == 'value-str' && jobParam['type-str'] == "Boolean") {
+                if (modelField.id == 'value-str' && jobParam['hint'] == "tag:textarea") {
+                    formElement = new TextAreaElement(
+                        {
+                            'id': 'id_parameters-' + param_idx.toString() + '-' + modelField.id,
+                            'name': 'parameters-' + param_idx.toString() + '-' + modelField.id,
+                            'readonly': modelField.readonly,
+                            'onchange':
+                                (! modelField.isHidden) ?
+                                '$(\'#id_parameters-' + param_idx.toString() + '-' + modelField.name + '\').attr(\'value\', $(this).val());'
+                                :
+                                '',
+                            'style': 'width: 100%; margin: 0px;'
+                        }, jobParam[modelField.id]
+                    );
+                } else if (modelField.id == 'value-str' && jobParam['type-str'] == "Boolean") {
                     formElement = new InputElement(
                         {
                             'id': 'id_parameters-' + param_idx.toString() + '-' + modelField.id,
@@ -428,7 +442,7 @@ function buildJobParamsFieldSet(jobParams, initForms=0, minNumForms=0, maxNumFor
                         'class': 'btn btn-link no-form-control',
                         'data-toggle': 'tooltip',
                         'data-container': 'body',
-                        'data-placement': 'right',
+                        'data-placement': 'auto right',
                         'data-title': jobParam['description'],
                         'type': 'button',
                         'style': 'width: auto; color: #337ab7;'

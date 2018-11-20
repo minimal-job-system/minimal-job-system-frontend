@@ -99,6 +99,7 @@
                             paramDecl = job_template.parameter_declarations[idx];
                             var metadata = new Map();
                             metadata.set("description", paramDecl.description);
+                            metadata.set("hint", paramDecl.hint);
                             metadata.set("is_hidden", unsave_eval(paramDecl.is_hidden.toLowerCase()) || false);
                             metadata.set("is_hidden_expr", paramDecl.is_hidden.toLowerCase());
                             metadata.set("is_dangerous", unsave_eval(paramDecl.is_dangerous.toLowerCase()) || false);
@@ -118,6 +119,7 @@
                                 'value': '{{ job_param_form.value.value }}',
                                 'choices': paramMetadata.get('{{ job_param_form.name.value }}').get('choices'),
                                 'description': paramMetadata.get('{{ job_param_form.name.value }}').get('description'),
+                                'hint': paramMetadata.get('{{ job_param_form.name.value }}').get('hint'),
                                 'is_hidden': paramMetadata.get('{{ job_param_form.name.value }}').get('is_hidden'),
                                 'is_hidden_expr': paramMetadata.get('{{ job_param_form.name.value }}').get('is_hidden_expr'),
                                 'is_dangerous': paramMetadata.get('{{ job_param_form.name.value }}').get('is_dangerous'),
@@ -178,6 +180,7 @@
                         'value': param_decl.default,
                         'choices': param_decl.choices,
                         'description': param_decl.description,
+                        'hint': param_decl.hint,
                         'is_hidden': unsave_eval(is_hidden_expr) || false,  // set to 'false' if expression contains '{}' variables
                         'is_hidden_expr': is_hidden_expr,
                         'is_dangerous': unsave_eval(is_dangerous_expr) || false,  // set to 'false' if expression contains '{}' variables
