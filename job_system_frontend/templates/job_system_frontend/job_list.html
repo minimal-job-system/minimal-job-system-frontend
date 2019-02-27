@@ -4,31 +4,43 @@
 
 {% block head_js_section %}
     <script>
-        var refresh_interval_id = setInterval(function() {
+        function refresh_interval_id() {
             $.ajax({
                 async: true,
                 type: "GET",
-                url: "{% url 'job_system_api:job_list' %}?is_archived=false",
+                url: "{% url 'job_system_api:job_list' %}?ordering=id&days_since_creation=30",
                 contentType: "application/json"
             }).done(function( jobs ) {
                 for (idx = 0; idx < jobs.length; ++idx) {
                     job = jobs[idx];
                     var job_row = $("tr#job_" + job['id'] + "_row");
                     var job_status_col = job_row.find("td:nth-child(5)");
-                    if (job['status'] == 'in progress') {
+                    var job_action_col = job_row.find("td:nth-child(6)");
+                    if (job['status'] == 'initialized') {
+                        job_status_col.html(job["status"]);
+                        if ({{ is_system_user|lower }}) {
+                            job_action_col.find("a.btn-stop").removeClass('disabled');
+                        }
+                    } else if (job['status'] == 'in progress') {
                         var progress = $('<div>', {'class': 'progress'});
                         var progress_bar = $('<div>', {'class':'progress-bar', 'role':'progressbar', 'aria-valuemin':'0', 'aria-valuemax':'100', 'style':'width: '+job['progress']+'%'});
-                        progress_bar.text(job['progress'] + '%');
+                        progress_bar.text(job['progress'].toFixed(2) + ' %');
                         progress.html(progress_bar.get(0).outerHTML);
                         //alert(JSON.stringify(progress, null, 4));
                         job_status_col.html(progress.get(0).outerHTML);
-                    }
-                    else {
+                        
+                        if ({{ is_system_user|lower }}) {
+                            job_action_col.find("a.btn-stop").removeClass('disabled');
+                        }
+                    } else {
                         job_status_col.html(job["status"]);
+                        job_action_col.find("a.btn-stop").addClass('disabled');
                     }
                 }
             });
-        }, 6000);
+        }
+
+        setInterval(refresh_interval_id, 6000);
     </script>
     <script>
         function reload_job_details(job_id) {
@@ -95,6 +107,54 @@
             });
         }
     </script>
+    <script>
+        function interrupt_job(job_id) {
+            if (!{{ is_system_user|lower }} || job_id === "") {
+                return;
+            }
+            
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "{% url 'job_system_api:job_list' %}" + job_id,
+                contentType: "application/json"
+            }).done(function( job ) {
+                if (job['status'] == 'initialized') {
+                    job['status'] = 'canceled';
+                }
+                else if (job['status'] == 'in progress') {
+                    job['status'] = 'stopping';
+                }
+                else {
+                    return;
+                }
+                
+                // change job status immediately as a refresh may take up to 6 seconds
+                var job_row = $("tr#job_" + job['id'] + "_row");
+                var job_status_col = job_row.find("td:nth-child(5)");
+                var job_action_col = job_row.find("td:nth-child(6)");
+                job_status_col.html(job['status']);
+                job_action_col.find("a.btn-stop").addClass('disabled');
+                
+                
+                var csrftoken = Cookies.get('csrftoken');
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    }
+                });
+                
+                $.ajax({
+                    type: "PUT",
+                    url: "{% url 'job_system_api:job_list' %}" + job_id + "/",
+                    contentType: "application/json",
+                    data: JSON.stringify(job)
+                });
+            });
+        }
+    </script>
 {% endblock head_js_section %}
 
 {% block content %}
@@ -144,7 +204,7 @@
                 {% else %}
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ job.progress }}%">
-                            {{ job.progress }}%
+                            {{ job.progress|floatformat:2 }} %
                         </div>
                     </div>
                 {% endif %}
@@ -152,20 +212,25 @@
             {% endif %}
                 <!--<td><button>Edit</button></td>-->
                 <td>
-                    <a href="#job_{{ job.id }}_details" data-toggle="collapse" class="btn btn-primary btn-sm" role="button" onclick="reload_job_details({{ job.id }});">
+                    <a href="#job_{{ job.id }}_details" data-toggle="collapse" class="btn btn-primary btn-sm btn-edit" role="button" onclick="reload_job_details({{ job.id }});">
                         <span class="glyphicon glyphicon-info-sign"></span> Details
                     </a>
-                </td>
-                <!--
-                <td>
+                    <!--
                     <a href="{% url 'job_system_frontend:job_list' %}{{ job.id }}/update" class="btn btn-primary btn-sm" role="button">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
                     </a>
-                    <a href="{% url 'job_system_frontend:job_list' %}{{ job.id }}/delete" class="btn btn-danger btn-sm" role="button">
-                        <span class="glyphicon glyphicon-minus"></span> Delete
+                    -->
+                    <a
+                        {% if not is_system_user or job.status != "initialized" and job.status != "in progress" %}
+                            class="btn btn-danger btn-sm btn-stop disabled"
+                        {% else %}
+                            class="btn btn-danger btn-sm btn-stop"
+                        {% endif %}
+                        role="button" onclick="interrupt_job({{ job.id }});"
+                    >
+                        <span class="glyphicon glyphicon-stop"></span> Stop
                     </a>
                 </td>
-                -->
             </tr>
             <tr><td colspan="6" style="padding: 0px;"/></tr>
             <tr id="job_{{ job.id }}_details_row">
