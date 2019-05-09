@@ -341,6 +341,7 @@ function buildJobParamsFieldSet(jobParams, initForms=0, minNumForms=0, maxNumFor
 
     var modelFields = [
         {'id': 'id', 'name': 'id', 'widthWeight': 0, 'readonly': true, 'isHidden': true},
+        {'id': 'DELETE', 'name': 'DELETE', 'widthWeight': 0, 'readonly': true, 'isHidden': true},
         {'id': 'type', 'name': 'type', 'widthWeight': 0, 'readonly': true, 'isHidden': true},
         {'id': 'value', 'name': 'value', 'widthWeight': 0, 'readonly': true, 'isHidden': true},
         {'id': 'name', 'name': 'name', 'widthWeight': 3, 'readonly': true, 'isHidden': false},
@@ -382,7 +383,7 @@ function buildJobParamsFieldSet(jobParams, initForms=0, minNumForms=0, maxNumFor
                             'style': 'width: 100%; margin: 0px;'
                         }, jobParam[modelField.id]
                     );
-                } else if (modelField.id == 'value-str' && jobParam['type-str'] == "Boolean") {
+                } else if (modelField.id == 'DELETE' || (modelField.id == 'value-str' && jobParam['type-str'] == "Boolean")) {
                     formElement = new InputElement(
                         {
                             'id': 'id_parameters-' + param_idx.toString() + '-' + modelField.id,

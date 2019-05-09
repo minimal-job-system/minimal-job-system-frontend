@@ -44,6 +44,15 @@
             }
             return null;
         }
+        function save_eval(code) {
+            try {
+                return Function(
+                    '"use strict"; return (' + code + ')'
+                )();
+            } catch(err) {
+            }
+            return null;
+        }
     </script>
     <script>
         $(document).ready(function() {
@@ -100,9 +109,9 @@
                             var metadata = new Map();
                             metadata.set("description", paramDecl.description);
                             metadata.set("hint", paramDecl.hint);
-                            metadata.set("is_hidden", unsave_eval(paramDecl.is_hidden.toLowerCase()) || false);
+                            metadata.set("is_hidden", save_eval(paramDecl.is_hidden.toLowerCase()) || false);
                             metadata.set("is_hidden_expr", paramDecl.is_hidden.toLowerCase());
-                            metadata.set("is_dangerous", unsave_eval(paramDecl.is_dangerous.toLowerCase()) || false);
+                            metadata.set("is_dangerous", save_eval(paramDecl.is_dangerous.toLowerCase()) || false);
                             metadata.set("is_dangerous_expr", paramDecl.is_dangerous.toLowerCase());
                             metadata.set("choices", paramDecl.choices);
                             paramMetadata.set(paramDecl.name, metadata);
@@ -112,6 +121,7 @@
                         {% for job_param_form in job_parameter_form_set.forms %}
                             jobParams.push({
                                 'id': '{{ job_param_form.id.value }}',
+                                'DELETE': '{{ job_param_form.DELETE.value }}',
                                 'type-str': paramTypes.get({{ job_param_form.type.value }}),
                                 'value-str': '{{ job_param_form.value.value }}',
                                 'name': '{{ job_param_form.name.value }}',
@@ -173,6 +183,7 @@
                     var is_dangerous_expr = param_decl.is_dangerous.toLowerCase();
                     jobParams.push({
                         'id': '',
+                        'DELETE': '',
                         'type-str': param_types.get(param_decl.type),
                         'value-str': param_decl.default,
                         'name': param_decl.name,
@@ -181,9 +192,9 @@
                         'choices': param_decl.choices,
                         'description': param_decl.description,
                         'hint': param_decl.hint,
-                        'is_hidden': unsave_eval(is_hidden_expr) || false,  // set to 'false' if expression contains '{}' variables
+                        'is_hidden': save_eval(is_hidden_expr) || false,  // set to 'false' if expression contains '{}' variables
                         'is_hidden_expr': is_hidden_expr,
-                        'is_dangerous': unsave_eval(is_dangerous_expr) || false,  // set to 'false' if expression contains '{}' variables
+                        'is_dangerous': save_eval(is_dangerous_expr) || false,  // set to 'false' if expression contains '{}' variables
                         'is_dangerous_expr': is_dangerous_expr,
                         'errors': [{% for error in field.errors %}'{{ error }},'{% endfor %}]
                     });
@@ -213,23 +224,48 @@
                         };
                     }
                     
-                    function create_action_function(parameter_name, is_hidden_expr) {
+                    function create_action_function(parameter_name, parameter_type, is_hidden_expr) {
                         return function(control_element) {
                             // we only support string expressions by now. (booleans and numbers are interpreted as string)
                             // TODO: interpret value based on parameter type
-                            is_hidden = unsave_eval(
+                            is_hidden = save_eval(
                                 is_hidden_expr.replace(/\{(.+?)\}/g, function(match, p1, offset, str) {
                                     return '"' + $('#id_' + p1 + '_row').find('[id$="value-str"]').val() + '"';
                                 })
                             );
                             $('#id_' + parameter_name + '_row').attr('hidden', is_hidden);
+                            
+                            if (is_hidden) {
+                                $('#id_' + parameter_name + '_row').find('[id$="DELETE"]').prop('checked', true);
+                            } else {
+                                $('#id_' + parameter_name + '_row').find('[id$="DELETE"]').prop('checked', false);
+                            }
+                            
+                            /*
+                            if (is_hidden) {
+                                switch (parameter_type) {
+                                    case "Integer":
+                                    case "Decimal":
+                                        $('#id_' + parameter_name + '_row').find('[id$="value"]').val(0);
+                                        $('#id_' + parameter_name + '_row').find('[id$="value-str"]').val(0);
+                                        break;
+                                    case "Boolean":
+                                        $('#id_' + parameter_name + '_row').find('[id$="value"]').val(false);
+                                        $('#id_' + parameter_name + '_row').find('[id$="value-str"]').prop('checked', false);
+                                        break;
+                                    default:
+                                        $('#id_' + parameter_name + '_row').find('[id$="value"]').val('');
+                                        $('#id_' + parameter_name + '_row').find('[id$="value-str"]').val('');
+                                }
+                            }
+                            */
                         };
                     }
                     
                     GlobalEventManager.addEventHandler(
                         create_get_element_id_function(expr_var[1]),
                         function(control_element) { return true; },
-                        create_action_function(jobParam.name, jobParam.is_hidden_expr)
+                        create_action_function(jobParam['name'], jobParam['type-str'], jobParam['is_hidden_expr'])
                     );
                 }
             }

@@ -26,5 +26,5 @@ class JobParameterForm(ModelForm):
 
 
 JobParameterFormSet = inlineformset_factory(
-    Job, JobParameter, form=JobParameterForm, extra=0
+    Job, JobParameter, form=JobParameterForm, extra=3, can_delete=True
 )
