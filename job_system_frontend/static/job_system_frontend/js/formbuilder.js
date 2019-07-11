@@ -296,6 +296,7 @@ function buildJobFieldSet(job) {
             formElement = new ButtonElement(
                 {
                     'class': 'btn btn-link no-form-control',
+                    //'data-html': 'true',
                     'data-toggle': 'tooltip',
                     'data-container': 'body',
                     'data-placement': 'auto right',
@@ -441,6 +442,7 @@ function buildJobParamsFieldSet(jobParams, initForms=0, minNumForms=0, maxNumFor
                 formElement = new ButtonElement(
                     {
                         'class': 'btn btn-link no-form-control',
+                        //'data-html': 'true',
                         'data-toggle': 'tooltip',
                         'data-container': 'body',
                         'data-placement': 'auto right',
