@@ -68,7 +68,7 @@
                 jobTemplates.push({
                     'id': '{{ job_template.id }}',
                     'name': '{{ job_template.name }}',
-                    'description': `{{ job_template.description }}`,
+                    'description': '{{ job_template.description|linebreaksbr }}',
                     'isSelected': {% if job_template.id|stringformat:"i" == selected_job_template %} true {% else %} false {% endif %}
                 });
             {% endfor %}

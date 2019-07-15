@@ -322,7 +322,11 @@ function buildJobFieldSet(job) {
     return fieldSetElement;
 }
 
-function buildJobParamsFieldSet(jobParams, initForms=0, minNumForms=0, maxNumForms=1000) {
+function buildJobParamsFieldSet(jobParams, initForms, minNumForms, maxNumForms) {
+    initForms = initForms || 0;
+    minNumForms = minNumForms || 0;
+    maxNumForms = maxNumForms || 1000;
+
     var fieldSetElement = new FieldSetElement({'id': 'id_job_parameters_fieldset'});
     fieldSetElement.innerHtmlElements.push(
         new LegendElement(null, "Job Parameters:")
