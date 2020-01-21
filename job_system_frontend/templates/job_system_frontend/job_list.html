@@ -18,7 +18,7 @@
                     var job_action_col = job_row.find("td:nth-child(6)");
                     if (job['status'] == 'initialized') {
                         job_status_col.html(job["status"]);
-                        if ({{ is_system_user|lower }}) {
+                        if ({{ is_system_user|lower }} && (!{{ only_owner_can_stop_job|lower }} || job['owner'] == {{ user.username }})) {
                             job_action_col.find("a.btn-stop").removeClass('disabled');
                         }
                     } else if (job['status'] == 'in progress') {
@@ -29,7 +29,7 @@
                         //alert(JSON.stringify(progress, null, 4));
                         job_status_col.html(progress.get(0).outerHTML);
                         
-                        if ({{ is_system_user|lower }}) {
+                        if ({{ is_system_user|lower }} && (!{{ only_owner_can_stop_job|lower }} || job['owner'] == {{ user.username }})) {
                             job_action_col.find("a.btn-stop").removeClass('disabled');
                         }
                     } else {
@@ -119,6 +119,7 @@
                 url: "{% url 'job_system_api:job_list' %}" + job_id,
                 contentType: "application/json"
             }).done(function( job ) {
+
                 if (job['status'] == 'initialized') {
                     job['status'] = 'canceled';
                 }
@@ -221,7 +222,7 @@
                     </a>
                     -->
                     <a
-                        {% if not is_system_user or job.status != "initialized" and job.status != "in progress" %}
+                        {% if not is_system_user or job.status != "initialized" and job.status != "in progress" or job.owner != user.username and only_owner_can_stop_job %}
                             class="btn btn-danger btn-sm btn-stop disabled"
                         {% else %}
                             class="btn btn-danger btn-sm btn-stop"

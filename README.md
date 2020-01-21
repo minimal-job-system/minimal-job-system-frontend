@@ -26,6 +26,9 @@ Detailed documentation is in the "docs" directory.
       ),
       'JOB_SYSTEM_ICON': (
         'job_system_app/img/default.ico', 'Icon of the Job System application'
+      ),
+      'ONLY_OWNER_CAN_STOP_JOB': (
+        True, 'Users can only stop their own jobs.', bool
       )
     }
 

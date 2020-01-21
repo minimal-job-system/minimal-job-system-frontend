@@ -15,6 +15,7 @@ from datetime import timedelta
 
 from job_system_api.models import JobTemplate, Job, JobParameter, JobLogEntry
 from job_system_frontend.forms import JobForm, JobParameterFormSet
+from job_system_frontend import settings
 
 
 def index(request):
@@ -37,6 +38,7 @@ class JobListView(FilterView):
         context = super(JobListView, self).get_context_data(**kwargs)
         context['is_system_user'] = \
             self.request.user.groups.filter(name='jobsys').exists()
+        context['only_owner_can_stop_job'] = settings.ONLY_OWNER_CAN_STOP_JOB
         context['log_levels'] = \
             JobLogEntry._meta.get_field('level').flatchoices
         return context
