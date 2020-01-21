@@ -16,3 +16,10 @@ class Settings:
             return config.JOB_SYSTEM_ICON
         else:
             return 'job_system_frontend/img/default.ico'
+
+    @property
+    def ONLY_OWNER_CAN_STOP_JOB(self):
+        if 'ONLY_OWNER_CAN_STOP_JOB' in dir(config):
+            return config.ONLY_OWNER_CAN_STOP_JOB
+        else:
+            return False
