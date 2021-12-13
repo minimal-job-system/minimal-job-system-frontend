@@ -36,7 +36,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     install_requires=[
-        'django>=2.0.13',
+        'django==2.0.13',
         'django-filter==2.1.0',
         'django-constance[database]==2.3.1',
         'django-minimal-job-system-api==0.0.4'
